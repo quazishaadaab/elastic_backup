@@ -1,0 +1,6 @@
+requests==2.31.0
+validators==0.20.0
+pyyaml==5.4.1
+pytest==7.3.1
+python-dotenv==1.0.0
+

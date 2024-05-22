@@ -1,0 +1,6 @@
+---
+index_template_endpoint: '_template'
+gitlab_endpoint: "Legacy_Index_Templates"
+gitlab_push_url: "gitlab.int.bell.ca/tvsre-tools/elastic/elastic-indices.git"
+gitlab_project_id: 1249
+gitlab_branch: "prod-LegacyIndexTemplate"

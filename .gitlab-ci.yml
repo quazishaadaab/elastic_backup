@@ -1,0 +1,79 @@
+stages:
+  - verify
+  - deploy
+include:
+  - project: 'innersource/gitlab-ci-templates'
+    ref: 1.0.0
+    file:
+      - '/jobs/python/test/pytest.yml'
+  - project: 'tvsre-tools/lib/gitlab-ci-templates'
+    ref: main
+    file:
+      - '/jobs/python/lint/verify-python.yml'
+
+pytest-base:
+  stage: verify
+  rules:
+    - if: '$CI_PIPELINE_SOURCE != "schedule" && $CI_PIPELINE_SOURCE != "merge_request_event"'
+      when: on_success
+  variables:
+    UNSET_PROXY: "false"
+    REQUIREMENTS_FILE: "requirements.txt"
+    PIP_INSTALL_ARGS: "--upgrade --upgrade-strategy=eager -r $REQUIREMENTS_FILE"
+    TEST_DIR: "/builds/tvsre-tools/elastic/elastic-backup-files"
+    PYTEST_ARGS: "--verbose $TEST_DIR"
+    ELK_TOKEN_PROD : '$ELASTIC_API_KEY'
+    ELK_TOKEN_DEV : '$ELASTIC_API_KEY_DEV'
+    GITLAB_TOKEN : '$GITLAB_API_KEY'
+  # Note: if image is overridden, dev tools may be missing (pytest, pytest-cov)
+  image: registry.gitlab.int.bell.ca/tvsre-tools/elastic/elastic-backup-files/bullseye-python-3.9-linter-dev-pytest-pyyaml-validators-requests-dotenv
+  # Note: if image is overridden, dev tools may be missing (pytest, pytest-cov)
+  tags:
+    - scarsdale
+  before_script:
+    - echo "Requirements file -> $REQUIREMENTS_FILE"        
+    - echo "pip install args -> $PIP_INSTALL_ARGS"
+    - echo "Test directory -> $TEST_DIR"
+    - echo "Unset proxy variables prior to running tests -> $UNSET_PROXY"
+    - echo "pytests args -> $PYTEST_ARGS"    
+    - env
+    - python3 --version
+  script:
+    - export elk_api_token=$ELK_TOKEN_PROD
+    - export elk_api_token_dev=$ELK_TOKEN_DEV
+    - export gitlab_api_token=$GITLAB_TOKEN
+    - if [ "${UNSET_PROXY=}" = true ]; then unset http_proxy https_proxy no_proxy; fi
+    - echo "http_proxy -> $http_proxy, https_proxy -> $https_proxy, no_proxy -> $no_proxy"
+    - cd test
+    - python3 -m pytest $PYTEST_ARGS
+
+backup:
+  stage: deploy
+  variables:
+    ELK_TOKEN_PROD : '$ELASTIC_API_KEY'
+    ELK_TOKEN_DEV : '$ELASTIC_API_KEY_DEV'
+    GITLAB_TOKEN : '$GITLAB_API_KEY'
+    UNSET_PROXY: "false"
+    REQUIREMENTS_FILE: "requirements.txt"
+    PIP_INSTALL_ARGS: "--upgrade --upgrade-strategy=eager -r $REQUIREMENTS_FILE"
+    TEST_DIR: "/builds/tvsre-tools/elastic/elastic-backup-files"
+    PYTEST_ARGS: "--verbose $TEST_DIR"
+
+  # Note: if image is overridden, dev tools may be missing (pytest, pytest-cov)
+  image: registry.gitlab.int.bell.ca/tvsre-tools/elastic/elastic-backup-files/bullseye-python-3.9-linter-dev-pytest-pyyaml-validators-requests-dotenv
+  tags:
+    - scarsdale
+  before_script:   
+    - echo "Requirements file -> $REQUIREMENTS_FILE"        
+    - echo "pip install args -> $PIP_INSTALL_ARGS"
+    - echo "Test directory -> $TEST_DIR"
+    - echo "Unset proxy variables prior to running tests -> $UNSET_PROXY"
+    - python3 --version # Print out python version for debugging
+  script:
+    - echo $ELASTIC_API_KEY
+    - echo $GITLAB_API_KEY
+    - export elk_api_token=$ELK_TOKEN_PROD
+    - export elk_api_token_dev=$ELK_TOKEN_DEV
+    - export gitlab_api_token=$GITLAB_TOKEN
+    - cd bin
+    - python3 main.py

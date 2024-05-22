@@ -1,0 +1,6 @@
+---
+gitlab_endpoint: "watcher-backup"
+gitlab_push_url: "gitlab.int.bell.ca/tvsre-tools/elastic/elastic-watches.git"
+gitlab_project_id: 29654 
+gitlab_branch: "production"
+elastic_endpoint: "_watcher/_query/watches"

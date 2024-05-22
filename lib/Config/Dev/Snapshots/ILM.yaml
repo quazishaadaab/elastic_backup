@@ -1,0 +1,6 @@
+---
+ilm_endpoint: '_ilm/policy'
+gitlab_endpoint: "ILM_Policies-dev"
+gitlab_push_url: "gitlab.int.bell.ca/tvsre-tools/elastic/elastic-indices.git"
+gitlab_project_id: 1249  
+gitlab_branch: "dev-ILM"

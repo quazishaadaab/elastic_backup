@@ -1,0 +1,6 @@
+---
+elastic_endpoint: "_logstash/pipeline"
+gitlab_endpoint: "logstash_pipelines-backups"
+gitlab_push_url: "gitlab.int.bell.ca/tvsre-tools/elastic/logstash-configuration.git"
+gitlab_project_id: 1204
+gitlab_branch: "production"
